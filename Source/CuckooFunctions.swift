@@ -22,6 +22,25 @@ public func verify<M: Mock>(_ mock: M, _ callMatcher: CallMatcher = times(1), fi
     return mock.getVerificationProxy(callMatcher, sourceLocation: (file, line))
 }
 
+/// Creates object used for verification of calls as well as their order.
+///
+/// Unlike ``verify(_:_:file:line:)``, this function asserts that you perform
+/// checks in the order that the corresponding calls were made to your mock.
+///
+/// ```swift
+/// mock.first()
+/// mock.second()
+///
+/// // fails, wrong order
+/// verifyNext(mock).second()
+/// verifyNext(mock).first()
+/// ```
+public func verifyNext<M: Mock>(_ mock: M, _ callMatcher: CallMatcher = times(1), file: StaticString = #file, line: UInt = #line) -> M.Verification {
+    var callMatcher = callMatcher
+    callMatcher.isStrict = true
+    return mock.getVerificationProxy(callMatcher, sourceLocation: (file, line))
+}
+
 /// Clears all invocations and stubs of mocks.
 public func reset(_ mocks: HasMockManager...) {
     mocks.forEach { mock in

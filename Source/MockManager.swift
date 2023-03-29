@@ -217,10 +217,16 @@ public class MockManager {
                 indexesToRemove.append(i)
             }
         }
+
+        let failsStrictCheck = callMatcher.isStrict && !unverifiedStubCallsIndexes.starts(with: indexesToRemove)
+
         unverifiedStubCallsIndexes = unverifiedStubCallsIndexes.filter { !indexesToRemove.contains($0) }
         
         if callMatcher.matches(calls) == false {
             let message = "Wanted \(callMatcher.name) but \(calls.count == 0 ? "not invoked" : "invoked \(calls.count) times")."
+            MockManager.fail((message, sourceLocation))
+        } else if failsStrictCheck {
+            let message = "Wanted \(callMatcher.name) but found other calls preceding it."
             MockManager.fail((message, sourceLocation))
         }
         return __DoNotUse()

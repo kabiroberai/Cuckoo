@@ -11,6 +11,11 @@ public struct CallMatcher {
     public let name: String
     
     private let matchesFunction: ([StubCall]) -> Bool
+
+    // this is internal to ensure that it's only set at the top level (i.e.
+    // in the `verifyNext` impl). it wouldn't make sense to `and`/`or` two
+    // `CallMatcher`s with different values of `isStrict`
+    var isStrict = false
     
     public init(name: String, matchesFunction: @escaping ([StubCall]) -> Bool) {
         self.name = name

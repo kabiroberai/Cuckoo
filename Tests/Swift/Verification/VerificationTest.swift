@@ -57,4 +57,26 @@ class VerificationTest: XCTestCase {
 
         verify(mock).genericReturn(equal(to: "Foo")).with(returnType: String?.self)
     }
+
+    func testVerifyNext() {
+        let mock = MockTestedClass()
+        stub(mock) { mock in
+            when(mock.readOnlyProperty).get.thenReturn("hi")
+            when(mock.count(characters: "a")).thenReturn(1)
+            when(mock.count(characters: "b")).thenReturn(2)
+        }
+
+        XCTAssertEqual(mock.count(characters: "a"), 1)
+        XCTAssertEqual(mock.readOnlyProperty, "hi")
+        XCTAssertEqual(mock.count(characters: "b"), 2)
+
+        verifyNext(mock).count(characters: "a")
+
+        let error = TestUtils.catchCuckooFail {
+            verifyNext(mock).count(characters: "b")
+        }
+        XCTAssertEqual(error, "Wanted 1 times but found other calls preceding it.")
+
+        verifyNext(mock).readOnlyProperty.get()
+    }
 }
